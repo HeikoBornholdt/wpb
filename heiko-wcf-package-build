@@ -95,30 +95,7 @@ fi
 
 PARENT_DIRECTORY=$(dirname "${SOURCE}")/
 
-# Packae alle benötigten Pakete
-# FIXME: Nur die Pakete packen, die auch ein file-Attribute hat
-REQUIRED_PACKAGES=$(xpath -q -e '//package/requiredpackages/requiredpackage[@file]/text()' "${INFO_FILE}")
-for PACKAGE in $REQUIRED_PACKAGES ; do
-  PACKAGE_SOURCE=${PARENT_DIRECTORY}${PACKAGE}/
-
-  if [ -d $PACKAGE_SOURCE ]; then
-    echo "Benötigtes Paket $PACKAGE_SOURCE"
-    heiko-wcf-package-build -t "${SOURCE}requirements/" "${PACKAGE_SOURCE}"
-  fi
-done
-
-# Package alle optionalen Pakete
-OPTIONAL_PACKAGES=$(xpath -q -e '//package/optionalpackages/optionalpackage[@file]/text()' "${INFO_FILE}")
-for PACKAGE in $OPTIONAL_PACKAGES ; do
-  PACKAGE_SOURCE=${PARENT_DIRECTORY}${PACKAGE}/
-
-  if [ -d $PACKAGE_SOURCE ]; then
-    echo "Optionales Paket $PACKAGE_SOURCE"
-    heiko-wcf-package-build -t "${SOURCE}optionals/" "${PACKAGE_SOURCE}"
-  fi
-done
-
-PACKAGE_NAME=$(echo $(xpath -q -e '//package/@name' "${INFO_FILE}") | sed 's/^name="\(.\+\)"/\1/')
+PACKAGE_NAME=$(cat "${INFO_FILE}" | grep '<package ' | sed 's/.*name="\([a-zA-Z0-9_-]\+\.[a-zA-Z0-9_-]\+\(\.[a-zA-Z0-9_-]\+\)\+\)".*/\1/')
 TAR_FILE=${TARGET}${PACKAGE_NAME}.tar
 
 echo "Packe ${TAR_FILE}"
