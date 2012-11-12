@@ -1,0 +1,147 @@
+#!/bin/bash
+########################################################################
+#
+# 2012-07-23
+# Heiko Bornholdt
+# heiko@bornholdt.it
+#
+########################################################################
+#
+#       This program is free software: you can redistribute it and/or modify
+#       it under the terms of the GNU General Public License as published by
+#       the Free Software Foundation, either version 3 of the License, or
+#       (at your option) any later version.
+#
+#       This program is distributed in the hope that it will be useful,
+#       but WITHOUT ANY WARRANTY; without even the implied warranty of
+#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#       GNU General Public License for more details.
+#
+#       You should have received a copy of the GNU General Public License
+#       along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+#
+# This script...
+#
+########################################################################
+
+USAGE="Usage:\n-h\t\tthis help message\n-t string\ttarget directory (optional)\n-z\t\tcreate gzipped archive\n   string\tpackage directory (mandatory)\n";
+
+TAR_EXCLUDE="--exclude=.DS_Store"
+
+if [ ! $# -ge 1 ]; then
+  printf "No arguments given.\n$USAGE" $(basename $0) >&2
+  exit 2;
+fi
+
+## Parse arguments
+while getopts ":ht:z" Option; do
+  case $Option in
+    h )
+        printf "$USAGE" $(basename $0);
+        exit 0;
+      ;;
+    t )
+        TARGET_GIVEN=1;
+        TARGET=${OPTARG}/;
+      ;;
+    z )
+        GZIP_GIVEN=1;
+      ;;
+    ? )
+        printf "Invalid option or option without parameter: -${OPTARG}\n$USAGE" $(basename $0) >&2
+        exit 2;
+      ;;
+    * )  # Default.
+        printf "Unimplemented option: -${OPTARG}\n$USAGE" $(basename $0) >&2
+        exit 2;
+      ;;
+    esac
+done
+
+# Nehme aktuelles Verzeichnis, wenn keins angegeben wurde
+if [ "${TARGET_GIVEN}" != 1 ]; then
+	TARGET=$(pwd)/
+else
+	TARGET=$(cd "${TARGET}" && pwd)/
+fi
+
+shift $(($OPTIND - 1))
+
+SOURCE=$(cd "${1}" && pwd)/
+
+# Handelt es sich beider Quelle um ein Verzeichnis?
+if [ ! -d ${SOURCE} ]; then
+  echo "${SOURCE} ist kein Verzeichnis."
+  exit 1
+fi
+
+# Handelt es sich beim Ziel um ein Verzeichnis?
+if [ ! -d ${TARGET} ]; then
+  echo "${TARGET} ist kein Verzeichnis."
+  exit 1
+fi
+
+# Existiert die package.xml?
+INFO_FILE=${SOURCE}package.xml
+
+if [ ! -f $INFO_FILE ]; then
+  echo "${INFO_FILE} existiert nicht."
+  exit 1
+fi
+
+PARENT_DIRECTORY=$(dirname "${SOURCE}")/
+
+# Packae alle benötigten Pakete
+# FIXME: Nur die Pakete packen, die auch ein file-Attribute hat
+REQUIRED_PACKAGES=$(xpath -q -e '//package/requiredpackages/requiredpackage[@file]/text()' "${INFO_FILE}")
+for PACKAGE in $REQUIRED_PACKAGES ; do
+  PACKAGE_SOURCE=${PARENT_DIRECTORY}${PACKAGE}/
+
+  if [ -d $PACKAGE_SOURCE ]; then
+    echo "Benötigtes Paket $PACKAGE_SOURCE"
+    heiko-wcf-package-build -t "${SOURCE}requirements/" "${PACKAGE_SOURCE}"
+  fi
+done
+
+# Package alle optionalen Pakete
+OPTIONAL_PACKAGES=$(xpath -q -e '//package/optionalpackages/optionalpackage[@file]/text()' "${INFO_FILE}")
+for PACKAGE in $OPTIONAL_PACKAGES ; do
+  PACKAGE_SOURCE=${PARENT_DIRECTORY}${PACKAGE}/
+
+  if [ -d $PACKAGE_SOURCE ]; then
+    echo "Optionales Paket $PACKAGE_SOURCE"
+    heiko-wcf-package-build -t "${SOURCE}optionals/" "${PACKAGE_SOURCE}"
+  fi
+done
+
+PACKAGE_NAME=$(echo $(xpath -q -e '//package/@name' "${INFO_FILE}") | sed 's/^name="\(.\+\)"/\1/')
+TAR_FILE=${TARGET}${PACKAGE_NAME}.tar
+
+echo "Packe ${TAR_FILE}"
+cd "${SOURCE}" && tar cf "${TAR_FILE}" ${TAR_EXCLUDE} --exclude='./acptemplates' --exclude='./files' --exclude='./pip' --exclude='./templates' *
+
+# Erstelle alle Subarchive
+ACP_TEMPLATES=${SOURCE}acptemplates/
+FILES=${SOURCE}files/
+PIP=${SOURCE}pip/
+TEMPLATES=${SOURCE}templates/
+
+for DIRECTORY in $ACP_TEMPLATES $FILES $PIP $TEMPLATES ; do
+  if [ -d "${DIRECTORY}" ]; then
+    ARCHIVE=$(basename $DIRECTORY).tar
+    #echo "Packe ${ARCHIVE}"
+    cd "${DIRECTORY}" && tar cf "${TARGET}${ARCHIVE}" ${TAR_EXCLUDE} *
+    cd "${TARGET}" && tar rf "${TAR_FILE}" "${ARCHIVE}"
+    rm "${TARGET}${ARCHIVE}"
+  fi
+done
+
+if [ "${GZIP_GIVEN}" = 1 ]; then
+  echo "Komprimiere erstelltes Paket"
+  gzip -f "${TAR_FILE}"
+fi
+
+#echo "Fertig!"
+exit 0
