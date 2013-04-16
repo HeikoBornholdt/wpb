@@ -57,9 +57,16 @@ while getopts ":ht:z" Option; do
     esac
 done
 
+function abort() {
+  echo "ERROR. Aborting."
+  exit 1
+}
+
+CURRENT=$(pwd)
+
 # Nehme aktuelles Verzeichnis, wenn keins angegeben wurde
 if [ "${TARGET_GIVEN}" != 1 ]; then
-	TARGET=$(pwd)/
+  TARGET=$(pwd)/
 else
   cd "$TARGET"
   TARGET=$(pwd)/
