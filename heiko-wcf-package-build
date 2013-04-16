@@ -61,12 +61,16 @@ done
 if [ "${TARGET_GIVEN}" != 1 ]; then
 	TARGET=$(pwd)/
 else
-	TARGET=$(cd "${TARGET}" && pwd)/
+  cd "$TARGET"
+  TARGET=$(pwd)/
+  cd "$CURRENT"
 fi
 
 shift $(($OPTIND - 1))
 
-SOURCE=$(cd "${1}" && pwd)/
+cd "$1"
+SOURCE=$(pwd)/
+cd "$CURRENT"
 
 # Handelt es sich beider Quelle um ein Verzeichnis?
 if [ ! -d ${SOURCE} ]; then
