@@ -18,7 +18,7 @@
 ########################################################################
 #
 # Install:
-#   $ wget --no-check-certificate -O /usr/local/bin/heiko-wcf-package-build https://raw.github.com/heikobornholdt/heiko-wcf-package-build/master/heiko-wcf-package-build
+#   $ wget -O /usr/local/bin/heiko-wcf-package-build https://raw.github.com/heikobornholdt/heiko-wcf-package-build/master/heiko-wcf-package-build
 #   $ chmod +x /usr/local/bin/heiko-wcf-package-build
 #
 ########################################################################
