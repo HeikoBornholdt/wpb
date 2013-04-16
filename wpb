@@ -27,6 +27,9 @@ USAGE="Usage:\n-h\t\tthis help message\n-t string\ttarget directory (optional)\n
 
 TAR_EXCLUDE="--exclude=.DS_Store"
 
+# disable creation of "._"-files in tar archives in Mac OS X
+export COPYFILE_DISABLE=true
+
 if [ ! $# -ge 1 ]; then
   printf "No arguments given.\n$USAGE" $(basename $0) >&2
   exit 2;
