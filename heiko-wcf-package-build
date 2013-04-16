@@ -73,23 +73,23 @@ SOURCE=$(pwd)/
 cd "$CURRENT"
 
 # Handelt es sich beider Quelle um ein Verzeichnis?
-if [ ! -d ${SOURCE} ]; then
-  echo "${SOURCE} ist kein Verzeichnis."
-  exit 1
+if [ ! -d "${SOURCE}" ]; then
+  echo "Quelle ${SOURCE} ist kein Verzeichnis."
+  abort
 fi
 
 # Handelt es sich beim Ziel um ein Verzeichnis?
-if [ ! -d ${TARGET} ]; then
-  echo "${TARGET} ist kein Verzeichnis."
-  exit 1
+if [ ! -d "${TARGET}" ]; then
+  echo "Ziel ${TARGET} ist kein Verzeichnis."
+  abort
 fi
 
 # Existiert die package.xml?
 INFO_FILE=${SOURCE}package.xml
 
-if [ ! -f $INFO_FILE ]; then
-  echo "${INFO_FILE} existiert nicht."
-  exit 1
+if [ ! -f "${INFO_FILE}" ]; then
+  echo "Info-Datei ${INFO_FILE} existiert nicht."
+  abort
 fi
 
 PARENT_DIRECTORY=$(dirname "${SOURCE}")/
