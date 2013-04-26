@@ -26,10 +26,12 @@ file_should_exist_in_archive() {
 
 ## main program
 
-wpb ./tests/com.example.test/
+sh -c "./wpb ./tests/com.example.test/"
 
 ARCHIVE="com.example.test.tar"
 
 file_should_exist "$ARCHIVE"
 file_should_exist_in_archive "$ARCHIVE" "package.xml"
 file_should_exist_in_archive "$ARCHIVE" "files.tar"
+
+rm -rf "$ARCHIVE"
