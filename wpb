@@ -84,13 +84,13 @@ cd "$CURRENT"
 
 # Handelt es sich beider Quelle um ein Verzeichnis?
 if [ ! -d "${SOURCE}" ]; then
-  echo "Quelle ${SOURCE} ist kein Verzeichnis."
+  echo "Source ${SOURCE} is not a directory."
   abort
 fi
 
 # Handelt es sich beim Ziel um ein Verzeichnis?
 if [ ! -d "${TARGET}" ]; then
-  echo "Ziel ${TARGET} ist kein Verzeichnis."
+  echo "Target ${TARGET} is not a directory."
   abort
 fi
 
@@ -98,7 +98,7 @@ fi
 INFO_FILE=${SOURCE}package.xml
 
 if [ ! -f "${INFO_FILE}" ]; then
-  echo "Info-Datei ${INFO_FILE} existiert nicht."
+  echo "Info file ${INFO_FILE} not found."
   abort
 fi
 
@@ -107,8 +107,9 @@ PARENT_DIRECTORY=$(dirname "${SOURCE}")/
 PACKAGE_NAME=$(cat "${INFO_FILE}" | grep '<package ' | sed 's/.*name="\([a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*\(\.[a-zA-Z0-9_-]*\)*\)".*/\1/')
 TAR_FILE=${TARGET}${PACKAGE_NAME}.tar
 
-echo "Packe ${TAR_FILE}"
+echo -n "Create package ${TAR_FILE}..."
 cd "${SOURCE}" && tar cf "${TAR_FILE}" ${TAR_EXCLUDE} --exclude='./acptemplates' --exclude='./files' --exclude='./pip' --exclude='./templates' *
+echo "done!"
 
 # Erstelle alle Subarchive
 ACP_TEMPLATES=${SOURCE}acptemplates/
@@ -127,9 +128,10 @@ for DIRECTORY in $ACP_TEMPLATES $FILES $PIP $TEMPLATES ; do
 done
 
 if [ "${GZIP_GIVEN}" = 1 ]; then
-  echo "Komprimiere erstelltes Paket"
+  echo -n "Compress package ${TAR_FILE}"...
   gzip -f "${TAR_FILE}"
+  echo "done!"
 fi
 
-#echo "Fertig!"
+echo "All done. Rejoice!"
 exit 0
