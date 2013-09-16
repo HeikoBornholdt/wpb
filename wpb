@@ -102,8 +102,6 @@ if [ ! -f "${INFO_FILE}" ]; then
   abort
 fi
 
-PARENT_DIRECTORY=$(dirname "${SOURCE}")/
-
 PACKAGE_NAME=$(cat "${INFO_FILE}" | grep '<package ' | sed 's/.*name="\([a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*\(\.[a-zA-Z0-9_-]*\)*\)".*/\1/')
 TAR_FILE=${TARGET}${PACKAGE_NAME}.tar
 
