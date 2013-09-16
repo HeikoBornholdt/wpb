@@ -3,6 +3,11 @@ WoltLab® Community Framework™ Package Builder
 
 Command line interface for building WoltLab® Community Framework™ Packages.
 
+Code Status:
+------------
+
+* [![build status](https://secure.travis-ci.org/heikobornholdt/wpb.png)](https://travis-ci.org/heikobornholdt/wpb) travis-ci.org (master branch)
+
 Installation:
 -------------
 
